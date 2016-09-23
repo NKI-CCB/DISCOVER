@@ -1,0 +1,93 @@
+---
+title: "An introduction to DISCOVER"
+author: "Sander Canisius"
+date: "`r Sys.Date()`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{An introduction to DISCOVER}
+output: knitr:::html_vignette
+---
+
+# An introduction to DISCOVER
+
+## Introduction
+
+DISCOVER is a novel statistical test for detecting co-occurrence and mutual exclusivity in cancer genomics data. Unlike traditional approaches used for these tasks such as Fisher's exact test, DISCOVER is based on a null model that takes into account the overall tumour-specific alteration rates when deciding whether alterations co-occur more or less often than expected by chance. This improved null model prevents spurious associations in co-occurrence detection, and increases the statistical power to detect mutual exclusivities.
+
+This vignette introduces the DISCOVER R package for mutual exclusivity and co-occurrence analysis. Two variants of the DISCOVER test are implemented by this package. The first variant tests pairs of genes for either co-occurrence or mutual exclusivity. The second is a mutual exclusivity test for gene sets larger than two. We will illustrate the use of both tests by performing a mutual exclusivity and co-occurrence analysis of somatic mutations in the TCGA breast cancer samples.
+
+
+## Set up
+
+First, we load the package and the breast cancer mutation data.
+
+```{r}
+library(discover)
+
+data("BRCA.mut")
+```
+
+A small fragment of the mutation matrix is shown below. It takes the form of a binary matrix, i.e. only 0 and 1 are allowed as values.
+
+```{r}
+BRCA.mut[1:5, 1:5]
+```
+
+An important ingredient of the DISCOVER test is the estimation of a background matrix. This is how tumour-specific alteration rates can be used by the test. To estimate this background matrix, a `discover.matrix` object is created and passed the mutation matrix. Depending on the size of the matrix this might take some time. This estimation step only needs to be performed once.
+
+```{r}
+events <- discover.matrix(BRCA.mut)
+
+```
+
+Note that for estimating this background matrix, it is important that the full mutation matrix is provided. Even if only a subset of genes will subsequently be used in the analysis, a whole-genome view of the mutations is required for this first step. Indeed, for this example we will only look for mutual exclusivity between genes that are mutated in at least 25 tumours.
+
+```{r}
+subset <- rowSums(BRCA.mut) > 25
+```
+
+## Pairwise tests
+
+We can now test for mutual exclusivity between all pairs of genes using the `pairwise.discover.test` function. Its only required argument is an instance of the `discover.matrix` class like we created above. In order to only analyse frequently mutated genes, we select the corresponding rows before passing the matrix to the function. Again, depending on the size of the matrix, this function might take some time.
+
+```{r}
+result.mutex <- pairwise.discover.test(events[subset, ])
+```
+
+We can get a quick overview of the results of this analysis simply by printing the result object.
+
+```{r}
+result.mutex
+```
+
+The `print` method for the `pairwise.discover.out` class optionally takes an argument with which the false discovery rate (FDR) threshold is selected. By default, a maximum FDR of 1% is used. Below, we get a summary of the test results using a somewhat more liberal threshold of 5%.
+
+```{r}
+print(result.mutex, fdr.threshold=0.05)
+```
+
+To get the pairs of genes which are significantly mutually exclusive, we can use the `as.data.frame` method. This method, too, takes an optional FDR threshold as argument. Below, we use the default of 1%.
+
+
+```{r}
+as.data.frame(result.mutex)
+```
+
+## Groupwise test
+
+In the above results, we can identify a set of four genes---*TP53*, *CDH1*, *GATA3*, and *MAP3K1*---for which all pairwise combinations are found mutually exclusive. We can use the `groupwise.discover.test` to asses whether this set of genes is also mutually exclusive as a group. This we can do by simply passing the subset of the `discover.matrix` that corresponds to the given genes.
+
+```{r}
+genes <- c("TP53", "CDH1", "GATA3", "MAP3K1")
+groupwise.discover.test(events[genes, ])
+```
+
+```{r}
+plot(events[genes, ])
+```
+
+## Session info
+
+```{r}
+sessionInfo()
+```

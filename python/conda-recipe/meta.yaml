@@ -1,0 +1,27 @@
+package:
+  name: discover
+  version: 0.9
+
+source:
+  path: ..
+  patches:
+    - arch-core2.patch
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - python
+    - numpy
+
+  run:
+    - python
+    - numpy
+    - pandas
+    - libgcc [not win]
+
+about:
+  home: http://ccb.nki.nl/software/discover
+  license: Apache 2.0
+  summary: 'DISCOVER co-occurrence and mutual exclusivity analysis'

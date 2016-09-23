@@ -1,0 +1,12 @@
+PKG_FCFLAGS = -ffree-line-length-none $(SHLIB_OPENMP_FCFLAGS)
+PKG_LIBS = $(SHLIB_OPENMP_CFLAGS) $(BLAS_LIBS)
+
+$(SHLIB) : rwrappers.o
+
+rwrappers.o : maxent.o fdr.o types.o poisbinom.o
+maxent.o : types.o
+fdr.o : poisbinom.o util.o types.o ieee_constants.o
+poisbinom.o : logspace.o types.o
+logspace.o : ieee_constants.o types.o
+util.o : uniinv.o types.o
+ieee_constants.o : types.o

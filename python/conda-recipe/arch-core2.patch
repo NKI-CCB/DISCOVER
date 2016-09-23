@@ -1,0 +1,19 @@
+*** setup.py	2016-03-09 10:21:25.938757551 +0100
+--- setup_core2.py	2016-03-09 10:23:45.513593449 +0100
+***************
+*** 74,80 ****
+  if compiler == "gnu95":
+      f77flags = []
+      f90flags = ["-ffree-line-length-none"]
+!     opt = ["-Ofast", "-march=native", "-funroll-loops", "-flto", "-fopenmp"]
+  elif compiler.startswith("intel"):
+      f77flags = []
+      f90flags = ["-assume realloc_lhs"]
+--- 74,80 ----
+  if compiler == "gnu95":
+      f77flags = []
+      f90flags = ["-ffree-line-length-none"]
+!     opt = ["-Ofast", "-march=core2", "-funroll-loops", "-flto", "-fopenmp"]
+  elif compiler.startswith("intel"):
+      f77flags = []
+      f90flags = ["-assume realloc_lhs"]

@@ -1,0 +1,13 @@
+Package: discover
+Version: 0.9-1
+Date: 2016-03-03
+Title: DISCOVER mutual exclusivity detection
+Author: Sander Canisius
+Maintainer: Sander Canisius <s.canisius@nki.nl>
+Description: DISCOVER method for mutual exclusivity detection in genomic data.
+License: Apache License (== 2.0)
+Depends:
+    matrixStats
+RoxygenNote: 5.0.0
+VignetteBuilder: knitr
+Suggests: knitr

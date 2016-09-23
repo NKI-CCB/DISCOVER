@@ -1,0 +1,65 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _discover ! in 
+    interface  ! in :_discover
+        module maxent ! in :_discover:src/maxent.f90
+            subroutine fit(rowvalues,rowweights,colvalues,colweights,mu) ! in :_discover:src/maxent.f90:maxent
+                integer dimension(:),intent(in) :: rowvalues
+                integer dimension(size(rowvalues)),intent(in),depend(rowvalues) :: rowweights
+                integer dimension(:),intent(in) :: colvalues
+                integer dimension(size(colvalues)),intent(in),depend(colvalues) :: colweights
+                real(8), target,dimension(size(rowvalues) + size(colvalues)),intent(out),depend(rowvalues,colvalues) :: mu
+            end subroutine fit
+        end module maxent
+        module poisbinom ! in :_discover:src/poisbinom.f90
+            function cdf(p,x) ! in :_discover:src/poisbinom.f90:poisbinom
+                real(8) dimension(:),intent(in) :: p
+                integer intent(in) :: x
+                real(8) :: cdf
+            end function cdf
+        end module poisbinom
+        module fdr ! in src/fdr.f90
+            use types, only: dp
+            function mutex(data,bg,lowertail,q,pi0) result (p) ! in src/fdr.f90:fdr
+                use poisbinom, only: cdf
+                integer dimension(:,:),intent(in) :: data
+                real(8) dimension(size(data, 1),size(data, 2)),intent(in),depend(data,data) :: bg
+                logical,intent(in) :: lowertail
+                real(8), dimension(size(data, 1) * (size(data, 1) - 1) / 2), intent(out) :: q
+                real(8), intent(out) :: pi0
+                real(8) dimension(size(data, 1) * (size(data, 1) - 1) / 2) :: p
+            end function mutex
+            function analyseblockstructure(data,bg,lowertail,blocklengths,qmatrix,pi0) result (pmatrix) ! in src/fdr.f90:fdr
+                use util, only: cumsum
+                integer dimension(:,:),intent(in) :: data
+                real(8) dimension(size(data, 1),size(data, 2)),intent(in),depend(data,data) :: bg
+                logical intent(in) :: lowertail
+                integer dimension(:),intent(in) :: blocklengths
+                real(8) dimension(size(data, 1),size(data, 1)), intent(out) :: qmatrix
+                real(8), intent(out) :: pi0
+                real(8) dimension(size(data, 1),size(data, 1)) :: pmatrix
+            end function analyseblockstructure
+            subroutine updatemultiq(bg1,bg2,lowertail,sortedlevels,qunique,expectedp0) ! in src/fdr.f90:fdr
+                real(8) dimension(:,:),intent(in) :: bg1
+                real(8) dimension(:,:),intent(in) :: bg2
+                logical intent(in) :: lowertail
+                real(8) dimension(:),intent(in) :: sortedlevels
+                real(8) dimension(size(sortedlevels)),intent(inout),depend(sortedlevels) :: qunique
+                real(8) intent(inout) :: expectedp0
+            end subroutine updatemultiq
+            function computep(chrom1,p1,chrom2,p2,lowertail) result (p) ! in src/fdr.f90:fdr
+                use poisbinom
+                integer dimension(:,:),intent(in) :: chrom1
+                real(8) dimension(size(chrom1, 1),size(chrom1, 2)),intent(in),depend(chrom1,chrom1) :: p1
+                integer dimension(:,:),intent(in) :: chrom2
+                real(8) dimension(size(chrom2, 1),size(chrom2, 2)),intent(in),depend(chrom2,chrom2) :: p2
+                logical intent(in) :: lowertail
+                real(8) dimension(size(chrom1, 1),size(chrom2, 1)) :: p
+            end function computep
+        end module fdr
+    end interface 
+end python module _discover
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
