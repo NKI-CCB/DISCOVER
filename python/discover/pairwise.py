@@ -42,7 +42,7 @@ def pairwise_discover_test(x, g=None, alternative="less", correct=True):
         p[numpy.triu_indices_from(p, 1)] = pFlat
 
         q = numpy.empty((x.shape[0], ) * 2)
-        q[:] = numpy.nan
+        q[:] = numpy.inf
         q[numpy.triu_indices_from(p, 1)] = qFlat
     else:
         i = numpy.argsort(g)
