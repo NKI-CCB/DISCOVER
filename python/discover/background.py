@@ -10,7 +10,7 @@ def count_unique(keys):
     return uniq_keys, numpy.bincount(bins)
 
 
-def estimateBackground(events, strata=None):
+def estimate_background(events, strata=None):
     events = numpy.asarray(events)
    
     if strata is None:
@@ -37,5 +37,5 @@ def estimateBackground(events, strata=None):
         strata = numpy.asarray(strata)
         result = numpy.empty(events.shape)
         for x in numpy.unique(strata):
-            result[:, strata == x] = estimateBackground(events[:, strata == x])
+            result[:, strata == x] = estimate_background(events[:, strata == x])
         return result

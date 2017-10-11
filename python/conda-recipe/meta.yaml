@@ -1,6 +1,6 @@
 package:
   name: discover
-  version: 0.9
+  version: 0.9.1
 
 source:
   path: ..

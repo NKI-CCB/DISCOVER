@@ -2,9 +2,9 @@
  DISCOVER
 ==========
 
-DISCOVER is a novel statistical method for analysing co-occurrence and mutual exclusivity in cancer genomics data. The details of this method are described in our paper *A novel independence test for somatic alterations in cancer shows that biology drives mutual exclusivity but chance explains co-occurrence* (preprint_).
+DISCOVER is a novel statistical method for analysing co-occurrence and mutual exclusivity in cancer genomics data. The details of this method are described in our paper *A novel independence test for somatic alterations in cancer shows that biology drives mutual exclusivity but chance explains most co-occurrence* (`Genome Biology 2016 17:261`_).
 
-.. _preprint: http://dx.doi.org/10.1101/052803
+.. _`Genome Biology 2016 17:261`: http://dx.doi.org/10.1186/s13059-016-1114-x
 
 
 Installation
@@ -53,7 +53,7 @@ Check the documentation_ for instructions on how to use this package.
 R
 -
 
-We provide precompiled R packages for 64-bit Windows (R 3.1 & 3.2), and Mac OS X (R 3.2 only), as well as a source package for installation on Linux. To install the DISCOVER package, execute the following in an R session.
+We provide precompiled R packages for Windows and Mac OS X, as well as a source package for installation on Linux. Installation on Linux requires gfortran version 4.6 or later. To install the DISCOVER package, execute the following in an R session.
 
 ::
 

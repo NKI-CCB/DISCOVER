@@ -1,7 +1,7 @@
 import numpy
 import pandas
 
-from .background import estimateBackground
+from .background import estimate_background
 
 
 class DiscoverMatrix(object):
@@ -45,7 +45,7 @@ class DiscoverMatrix(object):
         self._events = events.copy(deep=False)
 
         if bg is None:
-            self._bg = events.__array_wrap__(estimateBackground(events, strata))
+            self._bg = events.__array_wrap__(estimate_background(events, strata))
         else:
             if strata is not None:
                 import warnings

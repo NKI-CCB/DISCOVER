@@ -1,0 +1,13 @@
+bibentry(
+    "Article",
+    header="To cite DISCOVER in publications use:",
+    author=c(person("Sander", "Canisius"),
+             person(c("John", "W.", "M."), "Martens"),
+	     person(c("Lodewyk", "F.", "A."), "Wessels")),
+    title="A novel independence test for somatic alterations in cancer shows that biology drives mutual exclusivity but chance explains most co-occurrence",
+    journal="Genome Biology",
+    year="2016",
+    volume="17",
+    number="1",
+    pages="261",
+    doi="10.1186/s13059-016-1114-x")

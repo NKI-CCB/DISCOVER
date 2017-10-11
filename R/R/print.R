@@ -12,7 +12,7 @@ print.pairwise.discover.out <- function (x, fdr.threshold=0.01) {
   cat("proportion of true null hypotheses:", x$pi0)
   cat("\n")
 
-  cat("number of significant pairs at a maximum FDR of", fdr.threshold, ":", sum(x$pi0 * x$q.values < 0.01, na.rm=TRUE))
+  cat("number of significant pairs at a maximum FDR of", fdr.threshold, ":", sum(x$pi0 * x$q.values < fdr.threshold, na.rm=TRUE))
   cat("\n")
 }
 

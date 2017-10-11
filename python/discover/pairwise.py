@@ -106,7 +106,8 @@ class PairwiseDiscoverResult:
             ``qvalue`` contain the DISCOVER test P value and the FDR-corrected
             Q value.
         """
-        i, j = numpy.where(self.pi0 * numpy.asarray(self.qvalues) < q_threshold)
+        i, j = numpy.triu_indices_from(self.qvalues, 1)
+        i, j = numpy.c_[i, j][self.pi0 * self.qvalues.values[i, j] < q_threshold].T
         return pandas.DataFrame({
             "gene1": self.qvalues.index[i],
             "gene2": self.qvalues.columns[j],
@@ -114,6 +115,10 @@ class PairwiseDiscoverResult:
             "qvalue": numpy.asarray(self.qvalues)[i, j]})
 
     def __repr__(self):
+        q_threshold = 0.01
+        i, j = numpy.triu_indices_from(self.qvalues, 1)
+        num_significant = numpy.sum(self.pi0 * self.qvalues.values[i, j] < q_threshold)
+
         return (
             "Pairwise DISCOVER {type} test\n"
             "alternative hypothesis: observed overlap is {alternative} than expected by chance\n"
@@ -123,7 +128,7 @@ class PairwiseDiscoverResult:
             "number of significant pairs at a maximum FDR of {fdr_threshold}: {num_significant}\n").format(
                 type={"less": "mutual exclusivity", "greater": "co-occurrence"}[self.alternative],
                 alternative=self.alternative,
-                num_tested=numpy.isfinite(numpy.asarray(self.pvalues)).sum(),
+                num_tested=i.shape[0],
                 pi0=self.pi0,
-                fdr_threshold=0.01,
-                num_significant=numpy.sum(self.pi0 * numpy.asarray(self.qvalues) < 0.01))
+                fdr_threshold=q_threshold,
+                num_significant=num_significant)
