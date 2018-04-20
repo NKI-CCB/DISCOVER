@@ -1,0 +1,12 @@
+blas_impl:
+  - mkl                        # [x86]
+  - openblas                   # [not win]
+
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+
+numpy:
+  - 1.9                        # [unix]
+  - 1.13                       # [win]

@@ -1,25 +1,53 @@
 package:
   name: discover
-  version: 0.9.1
+  version: 0.9.2
 
 source:
   path: ..
   patches:
     - arch-core2.patch
+    - no-lto.patch                  # [osx]
 
 build:
   number: 0
+  
+  requires_features:
+    blas: {{ blas_impl }}
+  
+  features:
+    - nomkl                         # [x86 and blas_impl != 'mkl']
 
 requirements:
   build:
+    - {{ compiler('c') }}           # [unix]
+    - {{ compiler('fortran') }}     # [unix]
+    - m2w64-toolchain               # [win]
+    - libpython                     # [win]
+    # https://github.com/ContinuumIO/anaconda-issues/issues/8812
+    - gcc 4.8                       # [osx]
+
+  host:
     - python
     - numpy
+    - mkl-devel                     # [blas_impl == 'mkl']
+    - openblas-devel                # [blas_impl == 'openblas']
+    - nomkl                         # [x86 and blas_impl != 'mkl']
 
   run:
     - python
-    - numpy
+    - {{ pin_compatible('numpy') }}
     - pandas
-    - libgcc [not win]
+    - m2w64-gcc-libs                # [win]
+    - m2w64-gcc-libgfortran         # [win]
+
+test:
+  requires:
+    - nomkl                         # [x86 and blas_impl == 'openblas']
+  imports:
+    - discover
+  commands:
+    - conda inspect linkages -p $PREFIX discover      # [not win]
+    - conda inspect objects -p $PREFIX discover       # [osx]
 
 about:
   home: http://ccb.nki.nl/software/discover

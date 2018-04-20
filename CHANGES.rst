@@ -21,12 +21,25 @@ of the Python package would have features that do not exist in version
 0.9 series
 ==========
 
-:Latest Python version:  0.9.1 (October 11, 2017)
+:Latest Python version:  0.9.2 (April 20, 2018)
 :Latest R version:       0.9.2 (October 11, 2017)
 
 
 Python package
 --------------
+
+0.9.2 (April 20, 2018)
+~~~~~~~~~~~~~~~~~~~~~~
+
+**Added:**
+
+- Added a new conda recipe, which takes advantage of features introduced by conda build 3.
+
+**Fixed:**
+
+- The RuntimeWarning fix added in version 0.9.1 did not work when the
+  pairwise_discover_test function was given a grouping factor.
+
 
 0.9.1 (October 11, 2017)
 ~~~~~~~~~~~~~~~~~~~~~~~~

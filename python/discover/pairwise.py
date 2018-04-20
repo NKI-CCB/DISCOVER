@@ -106,8 +106,8 @@ class PairwiseDiscoverResult:
             ``qvalue`` contain the DISCOVER test P value and the FDR-corrected
             Q value.
         """
-        i, j = numpy.triu_indices_from(self.qvalues, 1)
-        i, j = numpy.c_[i, j][self.pi0 * self.qvalues.values[i, j] < q_threshold].T
+        with numpy.errstate(invalid="ignore"):
+            i, j = numpy.where(self.pi0 * self.qvalues.values < q_threshold)
         return pandas.DataFrame({
             "gene1": self.qvalues.index[i],
             "gene2": self.qvalues.columns[j],
@@ -116,8 +116,9 @@ class PairwiseDiscoverResult:
 
     def __repr__(self):
         q_threshold = 0.01
-        i, j = numpy.triu_indices_from(self.qvalues, 1)
-        num_significant = numpy.sum(self.pi0 * self.qvalues.values[i, j] < q_threshold)
+        num_tested = numpy.isfinite(self.pvalues.values).sum()
+        with numpy.errstate(invalid="ignore"):
+            num_significant = numpy.sum(self.pi0 * self.qvalues.values < q_threshold)
 
         return (
             "Pairwise DISCOVER {type} test\n"
@@ -128,7 +129,7 @@ class PairwiseDiscoverResult:
             "number of significant pairs at a maximum FDR of {fdr_threshold}: {num_significant}\n").format(
                 type={"less": "mutual exclusivity", "greater": "co-occurrence"}[self.alternative],
                 alternative=self.alternative,
-                num_tested=i.shape[0],
+                num_tested=num_tested,
                 pi0=self.pi0,
                 fdr_threshold=q_threshold,
                 num_significant=num_significant)
