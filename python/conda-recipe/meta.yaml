@@ -6,6 +6,7 @@ source:
   path: ..
   patches:
     - arch-core2.patch
+    - no-stack-arrays.patch
     - no-lto.patch                  # [osx]
 
 build:
