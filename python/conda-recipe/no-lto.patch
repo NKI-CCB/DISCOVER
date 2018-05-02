@@ -5,7 +5,7 @@
   if compiler == "gnu95":
       f77flags = []
       f90flags = ["-ffree-line-length-none"]
-!     opt = ["-Ofast", "-march=core2", "-funroll-loops", "-flto", "-fopenmp"]
+!     opt = ["-Ofast", "-fno-stack-arrays", "-march=core2", "-funroll-loops", "-flto", "-fopenmp"]
   elif compiler.startswith("intel"):
       f77flags = []
       f90flags = ["-assume realloc_lhs"]
@@ -13,7 +13,7 @@
   if compiler == "gnu95":
       f77flags = []
       f90flags = ["-ffree-line-length-none"]
-!     opt = ["-Ofast", "-march=core2", "-funroll-loops", "-fopenmp"]
+!     opt = ["-Ofast", "-fno-stack-arrays", "-march=core2", "-funroll-loops", "-fopenmp"]
   elif compiler.startswith("intel"):
       f77flags = []
       f90flags = ["-assume realloc_lhs"]
