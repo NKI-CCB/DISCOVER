@@ -3,4 +3,4 @@ from .grouptest import groupwise_discover_test
 from .pairwise import pairwise_discover_test
 
 
-__version__ = "0.9.2"
+__version__ = "0.9.3"

@@ -6,16 +6,17 @@ module logspace
 
 contains
   
-  elemental function log1p(x) result (y)
+  impure elemental function log1p(x) result (y)
     real(dp), intent(in) :: x
     real(dp) :: y
-    real(dp), volatile :: z
-
-    z = 1.0d0 + x
-    if (z == 0) then
-       y = log(z)
+    real(dp), volatile :: u, v
+  
+    u = 1.0d0 + x
+    if (u == 0) then
+       y = log(u)
     else
-       y = log(z) - ((z - 1.0d0) - x) / z    ! cancels errors with IEEE arithmetic
+       v = u - 1.0d0
+       y = log(u) - (v - x) / u    ! cancels errors with IEEE arithmetic
     end if
   end function log1p
 
