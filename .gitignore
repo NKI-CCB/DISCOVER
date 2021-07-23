@@ -1,5 +1,9 @@
-python/build
+*.o
+*.mod
+*.so
 
-.hg
-.hgignore
-.hgtags
+*.py[cod]
+__pycache__/
+
+/python/build/
+
