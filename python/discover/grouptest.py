@@ -16,9 +16,7 @@ def groupTestExclusivity(events, bg):
             numpy.repeat(logNotP.sum(0)[numpy.newaxis], bg.shape[0], 0) + logP - logNotP, 0))
     x = numpy.sum(events.sum(0) == 1)
 
-    # the numpy.minimum(...) fix should probably be in the poisbinom
-    # module rather than here, but it solves the problem for now
-    return 1 - numpy.minimum(1.0, poisbinom.cdf(pExactlyOne, x - 1))
+    return 1 - poisbinom.cdf(pExactlyOne, x - 1)
 
 
 def groupTestImpurity(events, bg):

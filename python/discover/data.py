@@ -42,6 +42,9 @@ class DiscoverMatrix(object):
     """
 
     def __init__(self, events, bg=None, strata=None):
+        if not isinstance(events, pandas.DataFrame):
+            raise TypeError("Parameter `events` must be a pandas.DataFrame")
+
         self._events = events.copy(deep=False)
 
         if bg is None:
@@ -61,7 +64,21 @@ class DiscoverMatrix(object):
         assert (self._events.columns == self._bg.columns).all()
 
     def __getitem__(self, idx):
-        return DiscoverMatrix(self._events.ix[idx], self._bg.ix[idx])
+        if not isinstance(idx, (pandas.Index, pandas.Series)):
+            idx = numpy.asanyarray(idx)
+
+        if not idx.ndim == 1:
+            raise ValueError("`idx` should be a 1-dimensional array")
+
+        # This is meant to emulate pandas' deprecated .ix[] indexer.
+        # If `idx` contains integers, use .iloc[] unless `_events.index`
+        # has an integer dtype. In that case, as well as when `idx` does
+        # not contain integers, use .loc[].
+        if (numpy.issubdtype(idx.dtype, numpy.integer) and
+              not numpy.issubdtype(self._events.index.dtype, numpy.integer)):
+            return DiscoverMatrix(self._events.iloc[idx], self._bg.iloc[idx])
+        else:
+            return DiscoverMatrix(self._events.loc[idx], self._bg.loc[idx])
 
     @property
     def events(self):

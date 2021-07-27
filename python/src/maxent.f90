@@ -6,39 +6,17 @@ module maxent
 
 contains
 
-  function scaleMatrix(matrix, rowScaling, colScaling) result (scaled)
-    real(dp), dimension(:, :), intent(in) :: matrix
-    integer, dimension(size(matrix, 1)), intent(in) :: rowScaling
-    integer, dimension(size(matrix, 2)), intent(in) :: colScaling
-    real(dp), dimension(size(matrix, 1), size(matrix, 2)) :: scaled
+  function outer(x, y)
+    real(dp), dimension(:), intent(in) :: x
+    real(dp), dimension(:), intent(in) :: y
+    real(dp), dimension(size(x), size(y)) :: outer
 
-    integer :: i
+    integer :: i, j
 
-    forall (i = 1:size(matrix, 1))
-       scaled(i, :) = matrix(i, :) / colScaling
-    end forall
-
-    forall (i = 1:size(matrix, 2))
-       scaled(:, i) = scaled(:, i) / rowScaling
-    end forall
-  end function scaleMatrix
-
-  function multiplyMatrix(matrix, rowScaling, colScaling) result (scaled)
-    real(dp), dimension(:, :), intent(in) :: matrix
-    integer, dimension(size(matrix, 1)), intent(in) :: rowScaling
-    integer, dimension(size(matrix, 2)), intent(in) :: colScaling
-    real(dp), dimension(size(matrix, 1), size(matrix, 2)) :: scaled
-
-    integer :: i
-
-    forall (i = 1:size(matrix, 1))
-       scaled(i, :) = matrix(i, :) * colScaling
-    end forall
-
-    forall (i = 1:size(matrix, 2))
-       scaled(:, i) = scaled(:, i) * rowScaling
-    end forall
-  end function multiplyMatrix
+    do concurrent (i = 1:size(x), j = 1:size(y))
+       outer(i, j) = x(i) * y(j)
+    end do
+  end function outer 
 
   subroutine fit(rowValues, rowWeights, colValues, colWeights, mu)
     integer, dimension(:), intent(in) :: rowValues
@@ -59,23 +37,22 @@ contains
     real(dp), allocatable  :: wa(:)
     integer,  allocatable  :: iwa(:)
 
+    real(dp), dimension(size(rowValues)) :: row_violations
+    real(dp), dimension(size(colValues)) :: col_violations
     real(dp), dimension(size(rowValues), size(colValues)) :: P, eA
     integer :: nrows, ncols
-    integer, dimension(2) :: rowShape, colShape
 
-    real(dp), dimension(:, :), pointer :: mu_rows
-    real(dp), dimension(:, :), pointer :: mu_cols
+    real(dp), dimension(:), pointer :: mu_rows
+    real(dp), dimension(:), pointer :: mu_cols
 
     real(dp), dimension(:), pointer :: g_rows
     real(dp), dimension(:), pointer :: g_cols
     
     nrows = size(rowValues)
     ncols = size(colValues)
-    rowShape = [1, ncols]
-    colShape = [nrows, 1]
 
-    mu_rows(1:nrows, 1:1) => mu(:nrows)
-    mu_cols(1:1, 1:ncols) => mu(nrows+1:)
+    mu_rows(1:nrows) => mu(:nrows)
+    mu_cols(1:ncols) => mu(nrows+1:)
 
     g_rows(1:nrows) => g(:nrows)
     g_cols(1:ncols) => g(nrows+1:)
@@ -96,17 +73,18 @@ contains
             isave, dsave)
 
        if (task(1:2) .eq. 'FG') then
-          eA = matmul(exp(mu_rows / reshape(rowWeights, colShape)), &
-                      exp(mu_cols / reshape(colWeights, rowShape)))
+          eA = outer(exp(mu_rows), exp(mu_cols))
           P = 1.0d0 / (eA + 1)
 
-          f = -1 * (dot_product(mu_rows(:, 1), matmul(P, colWeights) - rowValues) &
-               + dot_product(mu_cols(1, :), matmul(rowWeights, P) - colValues) &
-               + sum(multiplyMatrix(log(eA) * eA / (eA + 1) - log(eA + 1), rowWeights, colWeights)))
+          row_violations = rowWeights * (matmul(P, colWeights) - rowValues)
+          col_violations = colWeights * (matmul(rowWeights, P) - colValues)
+          f = -1 * (dot_product(mu_rows, row_violations) &
+               + dot_product(mu_cols, col_violations) &
+               + dot_product(rowWeights, matmul(log(eA) * eA / (eA + 1) - log(eA + 1), colWeights)))
 
-          g_rows = -1 * (matmul(P, colWeights) - rowValues)
-          g_cols = -1 * (matmul(rowWeights, P) - colValues)
-       end if       
+          g_rows = -1 * row_violations
+          g_cols = -1 * col_violations
+       end if
     end do
 
     deallocate(wa)

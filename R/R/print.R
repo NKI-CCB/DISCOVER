@@ -4,6 +4,10 @@ print.pairwise.discover.out <- function (x, fdr.threshold=0.01) {
   cat("Pairwise DISCOVER", type, "test\n")
   cat("alternative hypothesis: observed overlap is", x$alternative, "than expected by chance\n")
 
+  fdr.method <- switch(x$fdr.method, DBH="discrete Benjamini-Hochberg", BH="Benjamini-Hochberg")
+  cat("FDR estimation method:", fdr.method)
+  cat("\n")
+
   cat("\n")
 
   cat("number of pairs tested:", sum(!is.na(x$p.values)))

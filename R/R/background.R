@@ -8,6 +8,7 @@
 #' x <- matrix(as.integer(runif(100) < 0.3), 10, 10)
 #' bg <- estimateBackground(x)
 #'
+#' @noRd
 #' @useDynLib discover
 estimateBackground <- function (events, strata=NULL) {
   if (is.null(strata)) {
@@ -27,7 +28,7 @@ estimateBackground <- function (events, strata=NULL) {
                    mu=double(length(row.values) + length(col.values)), PACKAGE="discover")$mu
 
     num.rows <- length(row.values)
-    eA <- exp(mu[1:num.rows] / row.weights) %*% t(exp(mu[(num.rows+1):length(mu)] / col.weights))
+    eA <- exp(mu[1:num.rows]) %*% t(exp(mu[(num.rows+1):length(mu)]))
     bg <- 1.0 / (eA + 1)
 
     bg <- bg[row.inverse, col.inverse]

@@ -83,6 +83,10 @@ elif compiler.startswith("intel"):
     opt = ["-fast", "-openmp"]
 else:
     print("Compiler %s not supported. Let's hope things just work." % compiler, file=sys.stderr)
+    f77flags = []
+    f90flags = []
+    opt = []
+
 
 
 blas_info = system_info.get_info("blas_opt")
@@ -113,7 +117,7 @@ discover_ext = Extension(
 
 if __name__ == "__main__":
     setup(name="discover",
-          version="0.9.3",
+          version="0.9.4",
           description="DISCOVER mutual exclusivity and co-occurrence analysis",
           author="Sander Canisius",
           author_email="s.canisius@nki.nl",

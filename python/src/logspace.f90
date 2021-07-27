@@ -22,17 +22,23 @@ contains
 
 
   function logadd(x, y) result (sum)
-    use ieee_constants, only: isneginf
-
     real(dp), intent(in) :: x, y
     real(dp) :: sum
 
-    if (isneginf(x)) then
-       sum = y
-    else if (isneginf(y)) then
-       sum = x
+    real(dp), parameter :: LOG2 = log(2.0_dp)
+    real(dp) :: x_minus_y
+
+    if (x == y) then
+       sum = x + LOG2
     else
-       sum = max(x, y) + log1p(exp(-abs(x - y)))
+       x_minus_y = x - y
+       if (x_minus_y > 0) then
+          sum = x + log1p(exp(-x_minus_y))
+       else if (x_minus_y <= 0) then
+          sum = y + log1p(exp(x_minus_y))
+       else
+          sum = x_minus_y
+       end if
     end if
   end function logadd
 

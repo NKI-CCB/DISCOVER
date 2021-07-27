@@ -13,7 +13,7 @@ groupwise.discover.test.coverage <- function (events, bg) {
 groupwise.discover.test.exclusivity <- function (events, bg) {
   log.p <- log(bg)
   log.not.p <- log1p(-bg)
-  p.exactly.one <- exp(matrixStats::colLogSumExps(rep.row(colSums(log.not.p), nrow(events)) + log.p - log.not.p))
+  p.exactly.one <- exp(colLogSumExps(rep.row(colSums(log.not.p), nrow(events)) + log.p - log.not.p))
   x <- sum(colSums(events) == 1)
   ppoisbinom(x, p.exactly.one, lower.tail=FALSE)
 }
@@ -22,7 +22,7 @@ groupwise.discover.test.exclusivity <- function (events, bg) {
 groupwise.discover.test.impurity <- function (events, bg) {
   log.p <- log(bg)
   log.not.p <- log1p(-bg)
-  p.exactly.one <- exp(matrixStats::colLogSumExps(rep.row(colSums(log.not.p), nrow(events)) + log.p - log.not.p))
+  p.exactly.one <- exp(colLogSumExps(rep.row(colSums(log.not.p), nrow(events)) + log.p - log.not.p))
   p.none <- exp(colSums(log.not.p))
   p.more.than.one <- 1 - p.none - p.exactly.one
   x <- sum(colSums(events) > 1)

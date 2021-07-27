@@ -21,12 +21,47 @@ of the Python package would have features that do not exist in version
 0.9 series
 ==========
 
-:Latest Python version:  0.9.3 (June 18, 2019)
-:Latest R version:       0.9.3 (June 18, 2019)
+:Latest Python version:  0.9.4 (July 28, 2021)
+:Latest R version:       0.9.4 (July 28, 2021)
 
 
 Python package
 --------------
+
+0.9.4 (July 28, 2021)
+~~~~~~~~~~~~~~~~~~~~~
+
+**Added**:
+
+- The new fdr_method argument of the pairwise_discover_test function
+  selects the false discovery rate estimation method used for multiple
+  testing correction. Its default value selects a Benjamini-Hochberg
+  procedure adapted for discrete test statistics. As an alternative,
+  the standard Benjamini-Hochberg procedure can be selected. While the
+  latter is much faster, it is also more conservative than the
+  discrete version. The discrete method was always used in previous
+  versions and is still the recommended choice.
+
+**Changed**:
+
+- Speed improvements in DiscoverMatrix and
+  pairwise_discover_test. DiscoverMatrix finishes instantaneously for
+  small to medium-sized data sets and takes only a few seconds for
+  very large data sets. pairwise_discover_test (with discrete
+  Benjamini-Hochberg) is about twice as fast as in previous versions.
+
+- Python 2.7 is no longer supported.
+
+**Fixed**:
+
+- If pandas >= 1.0 was installed, subsetting a DiscoverMatrix object
+  gave rise to "AttributeError: 'DataFrame' objects has no attribute
+  'ix'".
+
+- Fixed the underlying Fortran code to make it compile with GNU
+  Fortran >= 10. Due to these changes the minimum supported GNU
+  Fortran version is now version 5.
+
 
 0.9.3 (June 18, 2019)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +102,41 @@ First public release
 
 R package
 ---------
+
+0.9.4 (July 28, 2021)
+~~~~~~~~~~~~~~~~~~~~~
+
+**Added**:
+
+- The new fdr.method argument of the pairwise.discover.test function
+  selects the false discovery rate estimation method used for multiple
+  testing correction. Its default value selects a Benjamini-Hochberg
+  procedure adapted for discrete test statistics. As an alternative,
+  the standard Benjamini-Hochberg procedure can be selected. While the
+  latter is much faster, it is also more conservative than the
+  discrete version. The discrete method was always used in previous
+  versions and is still the recommended choice.
+
+**Changed**:
+
+- Speed improvements in discover.matrix and
+  pairwise.discover.test. discover.matrix finishes instantaneously for
+  small to medium-sized data sets and takes only a few seconds for
+  very large data sets. pairwise.discover.test (with discrete
+  Benjamini-Hochberg) is about twice as fast as in previous versions.
+
+- The matrixStats package is no longer a dependency.
+
+**Fixed**:
+
+- Re-enabled OpenMP, which distributes the computations in
+  pairwise.discover.test across multiple CPUs. OpenMP was disabled
+  since R 4.0.
+
+- Fixed the underlying Fortran code to make it compile with GNU
+  Fortran >= 10. Due to these changes the minimum supported GNU
+  Fortran version is now version 5.
+
 
 0.9.3 (June 18, 2019)
 ~~~~~~~~~~~~~~~~~~~~~

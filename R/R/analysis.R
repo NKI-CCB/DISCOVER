@@ -1,15 +1,22 @@
 #' Perform many pairwise mutual exclusivity or co-occurrence tests.
 #'
 #' @param x A \code{discover.matrix} object.
-#' @param g An optional grouping vector for the rows of \code{events}. Pairs of rows within the same group are not tested.
-#' @param alternative Either \code{"less"} for mutual-exclusivity analysis, or \code{"greater"} for co-occurrence analysis.
-#' @param correct If \code{TRUE}, multiple testing correction is performed.
+#' @param g An optional grouping vector for the rows of \code{events}. Pairs of rows
+#'   within the same group are not tested.
+#' @param alternative Either \code{"less"} for mutual-exclusivity analysis, or
+#'   \code{"greater"} for co-occurrence analysis.
+#' @param fdr.method The false discovery rate procedure used for multiple testing correction.
+#'   If \code{"DBH"}, a Benjamini-Hochberg procedure adapted for discrete test statistics is
+#'   used. If \code{"BH"}, the standard Benjamini-Hochberg procedure is used. The latter is
+#'   much faster, but also more conservative than the discrete version.
 #' @return An object of type \code{pairwise.discover.out}.
 #'
 #' @useDynLib discover
 #' @export
-pairwise.discover.test <- function (x, g=NULL, alternative=c("less", "greater"), correct=TRUE) {
+pairwise.discover.test <- function (x, g=NULL, alternative=c("less", "greater"), fdr.method=c("DBH", "BH")) {
   alternative <- match.arg(alternative)
+  fdr.method <- match.arg(fdr.method)
+  discrete.fdr <- fdr.method == "DBH"
 
   events <- x$events
   bg <- x$bg
@@ -18,9 +25,16 @@ pairwise.discover.test <- function (x, g=NULL, alternative=c("less", "greater"),
     result <- .Fortran("mutex",
                        as.integer(nrow(events)), as.integer(ncol(events)),
                        as.integer(events), as.double(bg), as.integer(alternative == "less"),
+                       as.integer(discrete.fdr),
                        p=double(nrow(events) * (nrow(events) - 1) / 2),
                        q=double(nrow(events) * (nrow(events) - 1) / 2),
                        pi0=double(1))
+
+    if (fdr.method == "BH") {
+      result$q <- p.adjust(result$p, "BH")
+      result$pi0 <- 1.0
+    }
+    
     p <- matrix(NA, nrow(events), nrow(events))
     p[lower.tri(p)] <- result$p
 
@@ -34,7 +48,13 @@ pairwise.discover.test <- function (x, g=NULL, alternative=c("less", "greater"),
                        as.integer(nrow(events)), as.integer(ncol(events)),
                        as.integer(events[i, ]), as.double(bg[i, ]), as.integer(alternative == "less"),
                        as.integer(length(block.sizes)), as.integer(block.sizes),
+                       as.integer(discrete.fdr),
                        p=double(nrow(events)**2), q=double(nrow(events)**2), pi0=double(1))
+
+    if (fdr.method == "BH") {
+      result$q <- p.adjust(result$p, "BH")
+      result$pi0 <- 1.0
+    }
 
     j <- order(i)
     p <- matrix(result$p, nrow=nrow(events))[j, j]
@@ -54,7 +74,8 @@ pairwise.discover.test <- function (x, g=NULL, alternative=c("less", "greater"),
     p.values=p,
     q.values=q,
     pi0=result$pi0,
-    alternative=alternative)
+    alternative=alternative,
+    fdr.method=fdr.method)
   class(result) <- "pairwise.discover.out"
   result
 }

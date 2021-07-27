@@ -51,6 +51,10 @@ contains
          end do
 
          cdf = logadd(cdf, memory(curr, n))
+         if (cdf >= 0) then
+            cdf = 0
+            exit
+         end if
 
          tmp = curr
          curr = prev
@@ -105,6 +109,10 @@ contains
          end do
 
          cdf(k) = logadd(cdf(k - 1), memory(curr, n))
+         if (cdf(k) >= 0) then
+            cdf(k:) = 0
+            exit
+         end if
 
          tmp = curr
          curr = prev

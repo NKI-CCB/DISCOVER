@@ -54,12 +54,13 @@ contains
   end function expectedP
 
 
-  function mutex(data, bg, lowerTail, q, pi0) result (p)
+  function mutex(data, bg, lowerTail, estimate_fdr, q, pi0) result (p)
     use util, only: bincount, cummin, cumsum, unique
 
     integer, dimension(:, :), intent(in) :: data
     real(dp), dimension(size(data, 1), size(data, 2)), intent(in) :: bg
     logical, intent(in) :: lowerTail
+    logical, intent(in) :: estimate_fdr
     real(dp), intent(out) :: pi0
 
     real(dp), dimension(size(data, 1) * (size(data, 1) - 1) / 2) :: p
@@ -76,35 +77,37 @@ contains
     integer :: i, j, n, t
 
     p = poisbinomTest(data, bg, lowerTail)
-    where (p > 1) p = 1     !!!!!!!!!!!!!!!!!!!!!!!!!!
-    call unique(p, sortedLevels, inv)
-    allocate(qUnique(size(sortedLevels)))
 
-    qUnique = 0
-    expectedP0 = 0
+    if (estimate_fdr) then
+       call unique(p, sortedLevels, inv)
+       allocate(qUnique(size(sortedLevels)))
 
-    n = size(data, 1)
+       qUnique = 0
+       expectedP0 = 0
 
-    !$omp parallel do private(i, j) reduction(+:qUnique,expectedP0)
-    do t = 1, n * (n - 1) / 2
-       call coordsFromLinear(n, t, i, j)
-       call updateQ(bg(i, :) * bg(j, :), lowerTail, sortedLevels, qUnique, expectedP0)
-    end do
-    !$omp end parallel do
+       n = size(data, 1)
 
-    counts = cumsum(bincount(inv))
-    qUnique = cumsum(qUnique) / counts
-    where (qUnique > 1) qUnique = 1
-    call cummin(qUnique)
+       !$omp parallel do private(i, j) reduction(+:qUnique,expectedP0)
+       do t = 1, n * (n - 1) / 2
+          call coordsFromLinear(n, t, i, j)
+          call updateQ(bg(i, :) * bg(j, :), lowerTail, sortedLevels, qUnique, expectedP0)
+       end do
+       !$omp end parallel do
 
-    do i = 1, size(inv)
-       q(i) = qUnique(inv(i))
-    end do
+       counts = cumsum(bincount(inv))
+       qUnique = cumsum(qUnique) / counts
+       where (qUnique > 1) qUnique = 1
+       call cummin(qUnique)
 
-    print *, "expected P:", expectedP0 / size(p)
-    print *, "mean P:", sum(p) / size(p)
-    pi0 = min(1.0_dp, sum(p) / expectedP0)
-    print *, "pi0:", pi0
+       do i = 1, size(inv)
+          q(i) = qUnique(inv(i))
+       end do
+
+       print *, "expected P:", expectedP0 / size(p)
+       print *, "mean P:", sum(p) / size(p)
+       pi0 = min(1.0_dp, sum(p) / expectedP0)
+       print *, "pi0:", pi0
+    end if
   end function mutex
 
 
@@ -154,7 +157,6 @@ contains
     else
        cdf = fullCdf(1 - p, size(p))
     end if
-    where (cdf > 1) cdf = 1  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     expectedP0 = expectedP0 + expectedP(cdf)
 
@@ -191,14 +193,15 @@ contains
   end subroutine updateMultiQ
 
 
-  function analyseBlockStructure(data, bg, lowerTail, blockLengths, qMatrix, pi0) result (pMatrix)
-    use ieee_constants, only: NAN
+  function analyseBlockStructure(data, bg, lowerTail, blockLengths, estimate_fdr, qMatrix, pi0) result (pMatrix)
+    use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan
     use util, only: bincount, cummin, cumsum, unique
 
     integer, dimension(:, :), intent(in) :: data
     real(dp), dimension(size(data, 1), size(data, 2)), intent(in) :: bg
     logical, intent(in) :: lowerTail
     integer, dimension(:), intent(in) :: blockLengths
+    logical, intent(in) :: estimate_fdr
     real(dp), dimension(size(data, 1), size(data, 1)), intent(out) :: qMatrix
     real(dp), intent(out) :: pi0
     real(dp), dimension(size(data, 1), size(data, 1)) :: pMatrix
@@ -237,37 +240,38 @@ contains
        p(k1:k2) = reshape(computeP(data(start1:end1, :), bg(start1:end1, :), data(start2:, :), bg(start2:, :), lowerTail), [k2 - k1 + 1])
     end do
 
-    where (p > 1) p = 1     !!!!!!!!!!!!!!!!!!!!!!!!!!
-    allocate(inv(size(p)))
-    call unique(p, sortedLevels, inv)
-    allocate(qUnique(size(sortedLevels)))
+    if (estimate_fdr) then
+       allocate(inv(size(p)))
+       call unique(p, sortedLevels, inv)
+       allocate(qUnique(size(sortedLevels)))
 
-    qUnique = 0
-    expectedP0 = 0
-    do i = 1, size(blockLengths) - 1
-       start1 = offsets(i)
-       end1 = offsets(i + 1) - 1
-       start2 = offsets(i + 1)
-       call updateMultiQ(bg(start1:end1, :), bg(start2:, :), lowerTail, sortedLevels, qUnique, expectedP0)
-    end do
+       qUnique = 0
+       expectedP0 = 0
+       do i = 1, size(blockLengths) - 1
+          start1 = offsets(i)
+          end1 = offsets(i + 1) - 1
+          start2 = offsets(i + 1)
+          call updateMultiQ(bg(start1:end1, :), bg(start2:, :), lowerTail, sortedLevels, qUnique, expectedP0)
+       end do
 
-    counts = cumsum(bincount(inv))
-    qUnique = cumsum(qUnique) / counts
-    where (qUnique > 1) qUnique = 1
-    call cummin(qUnique)
-    allocate(q(size(p)))
+       counts = cumsum(bincount(inv))
+       qUnique = cumsum(qUnique) / counts
+       where (qUnique > 1) qUnique = 1
+       call cummin(qUnique)
+       allocate(q(size(p)))
 
-    do i = 1, size(inv)
-       q(i) = qUnique(inv(i))
-    end do
+       do i = 1, size(inv)
+          q(i) = qUnique(inv(i))
+       end do
+
+       print *, "expected P:", expectedP0 / size(p)
+       print *, "mean P:", sum(p) / size(p)
+       pi0 = min(1.0_dp, sum(p) / expectedP0)
+       print *, "pi0:", pi0
+    end if
     
-    print *, "expected P:", expectedP0 / size(p)
-    print *, "mean P:", sum(p) / size(p)
-    pi0 = min(1.0_dp, sum(p) / expectedP0)
-    print *, "pi0:", pi0
-    
-    pMatrix = NAN
-    qMatrix = NAN
+    pMatrix = ieee_value(1.0_dp, ieee_quiet_nan)
+    qMatrix = ieee_value(1.0_dp, ieee_quiet_nan)
     do i = 1, size(blockLengths) - 1
        start1 = offsets(i)
        end1 = offsets(i + 1) - 1
@@ -275,7 +279,9 @@ contains
        k1 = flatOffsets(i)
        k2 = flatOffsets(i + 1) - 1
        pMatrix(start1:end1, start2:) = reshape(p(k1:k2), [end1 - start1 + 1, size(data, 1) - start2 + 1])
-       qMatrix(start1:end1, start2:) = reshape(q(k1:k2), [end1 - start1 + 1, size(data, 1) - start2 + 1])
+       if (estimate_fdr) then
+          qMatrix(start1:end1, start2:) = reshape(q(k1:k2), [end1 - start1 + 1, size(data, 1) - start2 + 1])
+       end if
     end do
   end function analyseBlockStructure
 

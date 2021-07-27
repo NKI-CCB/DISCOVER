@@ -21,21 +21,23 @@ python module _discover ! in
         end module poisbinom
         module fdr ! in src/fdr.f90
             use types, only: dp
-            function mutex(data,bg,lowertail,q,pi0) result (p) ! in src/fdr.f90:fdr
+            function mutex(data,bg,lowertail,estimate_fdr,q,pi0) result (p) ! in src/fdr.f90:fdr
                 use poisbinom, only: cdf
                 integer dimension(:,:),intent(in) :: data
                 real(8) dimension(size(data, 1),size(data, 2)),intent(in),depend(data,data) :: bg
                 logical,intent(in) :: lowertail
+                logical,intent(in) :: estimate_fdr
                 real(8), dimension(size(data, 1) * (size(data, 1) - 1) / 2), intent(out) :: q
                 real(8), intent(out) :: pi0
                 real(8) dimension(size(data, 1) * (size(data, 1) - 1) / 2) :: p
             end function mutex
-            function analyseblockstructure(data,bg,lowertail,blocklengths,qmatrix,pi0) result (pmatrix) ! in src/fdr.f90:fdr
+            function analyseblockstructure(data,bg,lowertail,blocklengths,estimate_fdr,qmatrix,pi0) result (pmatrix) ! in src/fdr.f90:fdr
                 use util, only: cumsum
                 integer dimension(:,:),intent(in) :: data
                 real(8) dimension(size(data, 1),size(data, 2)),intent(in),depend(data,data) :: bg
                 logical intent(in) :: lowertail
                 integer dimension(:),intent(in) :: blocklengths
+                logical,intent(in) :: estimate_fdr
                 real(8) dimension(size(data, 1),size(data, 1)), intent(out) :: qmatrix
                 real(8), intent(out) :: pi0
                 real(8) dimension(size(data, 1),size(data, 1)) :: pmatrix

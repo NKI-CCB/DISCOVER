@@ -1,0 +1,30 @@
+--- python/src/fdr.f90	2021-07-27 10:06:23.374451319 +0200
++++ python/src/fdr_old_nan.f90	2021-07-27 10:06:54.174951709 +0200
+@@ -194,7 +194,6 @@
+ 
+ 
+   function analyseBlockStructure(data, bg, lowerTail, blockLengths, estimate_fdr, qMatrix, pi0) result (pMatrix)
+-    use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan
+     use util, only: bincount, cummin, cumsum, unique
+ 
+     integer, dimension(:, :), intent(in) :: data
+@@ -217,6 +216,8 @@
+     real(dp), dimension(:), allocatable :: q
+     real(dp) :: expectedP0
+ 
++    real(dp), parameter :: NAN = transfer(Z'7ff8000000000000', 1.0d0)
++
+ 
+     ! size(blockLengths) should be > 1
+ 
+@@ -270,8 +271,8 @@
+        print *, "pi0:", pi0
+     end if
+     
+-    pMatrix = ieee_value(1.0_dp, ieee_quiet_nan)
+-    qMatrix = ieee_value(1.0_dp, ieee_quiet_nan)
++    pMatrix = NAN
++    qMatrix = NAN
+     do i = 1, size(blockLengths) - 1
+        start1 = offsets(i)
+        end1 = offsets(i + 1) - 1

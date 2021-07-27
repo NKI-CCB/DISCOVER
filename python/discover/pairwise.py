@@ -4,8 +4,10 @@ import pandas
 from collections import namedtuple
 from _discover import fdr
 
+from .stats import false_discovery_rate
 
-def pairwise_discover_test(x, g=None, alternative="less", correct=True):
+
+def pairwise_discover_test(x, g=None, alternative="less", fdr_method="DBH"):
     """
     Perform many pairwise mutual exclusivity or co-occurrence tests.
 
@@ -21,8 +23,11 @@ def pairwise_discover_test(x, g=None, alternative="less", correct=True):
         If 'less', a mutual-exclusivity analysis is performed, if 'greater' a
         co-occurrence analysis.
 
-    correct : bool, optional
-        If True, multiple testing correction is performed.
+    fdr_method : {'DBH', 'BH'}, optional
+        The false discovery rate procedure used for multiple testing correction.
+        If 'DBH', a Benjamini-Hochberg procedure adapted for discrete test statistics
+        is used. If 'BH', the standard Benjamini-Hochberg procedure is used. The latter
+        is much faster, but also more conservative than the discrete version.
 
     Returns
     -------
@@ -30,12 +35,18 @@ def pairwise_discover_test(x, g=None, alternative="less", correct=True):
         An object containing the test results for all pairwise combinations.
     """
     assert alternative in ["less", "greater"]
+    assert fdr_method in ["DBH", "BH"]
+    discrete_fdr = fdr_method == "DBH"
 
     events = x.events
     bg = x.bg
 
     if g is None:
-        pFlat, qFlat, pi0 = fdr.mutex(events, bg, alternative == "less")
+        pFlat, qFlat, pi0 = fdr.mutex(events, bg, alternative == "less", discrete_fdr)
+        
+        if fdr_method == "BH":
+            qFlat = false_discovery_rate(pFlat)
+            pi0 = 1.0
         
         p = numpy.empty((x.shape[0], ) * 2)
         p[:] = numpy.nan
@@ -48,7 +59,11 @@ def pairwise_discover_test(x, g=None, alternative="less", correct=True):
         i = numpy.argsort(g)
         levels, inverse = numpy.unique(g, return_inverse=True)
         blockSizes = numpy.bincount(inverse)
-        p, q, pi0 = fdr.analyseblockstructure(events[i], bg[i], alternative == "less", blockSizes)
+        p, q, pi0 = fdr.analyseblockstructure(events[i], bg[i], alternative == "less", blockSizes, discrete_fdr)
+        
+        if fdr_method == "BH":
+            q = false_discovery_rate(p)
+            pi0 = 1.0
 
         j = numpy.argsort(i)
         p = p[j[:, numpy.newaxis], j]
@@ -57,7 +72,7 @@ def pairwise_discover_test(x, g=None, alternative="less", correct=True):
     p = pandas.DataFrame(p, index=x.rownames, columns=x.rownames)
     q = pandas.DataFrame(q, index=x.rownames, columns=x.rownames)
 
-    return PairwiseDiscoverResult(p, q, pi0, alternative)
+    return PairwiseDiscoverResult(p, q, pi0, alternative, fdr_method)
 
 
 class PairwiseDiscoverResult:
@@ -79,13 +94,17 @@ class PairwiseDiscoverResult:
     alternative : {'less', 'greater'}
         If 'less', these results relate to mutual exclusivity, if 'greater' to
         co-occurrence.
+
+    fdr_method : {'DBH', 'BH'}
+        The method used to estimate these results' q-values.
     """
 
-    def __init__(self, pvalues, qvalues, pi0, alternative):
+    def __init__(self, pvalues, qvalues, pi0, alternative, fdr_method):
         self.pvalues = pvalues
         self.qvalues = qvalues
         self.pi0 = pi0
         self.alternative = alternative
+        self.fdr_method = fdr_method
 
     def significant_pairs(self, q_threshold=0.01):
         """
@@ -123,12 +142,14 @@ class PairwiseDiscoverResult:
         return (
             "Pairwise DISCOVER {type} test\n"
             "alternative hypothesis: observed overlap is {alternative} than expected by chance\n"
+            "FDR estimation method: {fdr_method}\n"
             "\n"
             "number of pairs tested: {num_tested}\n"
             "proportion of true null hypotheses: {pi0}\n"
             "number of significant pairs at a maximum FDR of {fdr_threshold}: {num_significant}\n").format(
                 type={"less": "mutual exclusivity", "greater": "co-occurrence"}[self.alternative],
                 alternative=self.alternative,
+                fdr_method={"DBH": "discrete Benjamini-Hochberg", "BH": "Benjamini-Hochberg"}[self.fdr_method],
                 num_tested=num_tested,
                 pi0=self.pi0,
                 fdr_threshold=q_threshold,
