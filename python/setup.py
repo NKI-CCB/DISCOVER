@@ -117,7 +117,7 @@ discover_ext = Extension(
 
 if __name__ == "__main__":
     setup(name="discover",
-          version="0.9.4",
+          version="0.9.5",
           description="DISCOVER mutual exclusivity and co-occurrence analysis",
           author="Sander Canisius",
           author_email="s.canisius@nki.nl",

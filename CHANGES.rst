@@ -21,12 +21,22 @@ of the Python package would have features that do not exist in version
 0.9 series
 ==========
 
-:Latest Python version:  0.9.4 (July 28, 2021)
+:Latest Python version:  0.9.5 (May 11, 2023)
 :Latest R version:       0.9.4 (July 28, 2021)
 
 
 Python package
 --------------
+
+0.9.5 (May 11, 2023)
+~~~~~~~~~~~~~~~~~~~~
+
+**Fixed**:
+
+- If pandas >= 2.0 was installed, constructing a DiscoverMatrix object
+  gave rise to "AttributeError: 'DataFrame' object has no attribute
+  '__array_wrap__'".
+
 
 0.9.4 (July 28, 2021)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +65,7 @@ Python package
 **Fixed**:
 
 - If pandas >= 1.0 was installed, subsetting a DiscoverMatrix object
-  gave rise to "AttributeError: 'DataFrame' objects has no attribute
+  gave rise to "AttributeError: 'DataFrame' object has no attribute
   'ix'".
 
 - Fixed the underlying Fortran code to make it compile with GNU

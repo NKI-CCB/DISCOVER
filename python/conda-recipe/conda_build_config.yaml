@@ -3,10 +3,24 @@ blas_impl:
 #  - openblas                   # [not win]
 
 python:
-  - 3.6
-  - 3.7
   - 3.8
   - 3.9
+  - 3.10
+  - 3.11
 
 numpy:
-  - 1.19
+  # python 3.8-3.9
+  - 1.16    # [not (osx and arm64)]
+  - 1.16    # [not (osx and arm64)]
+  # python 3.8-3.9
+  - 1.19    # [osx and arm64]
+  - 1.19    # [osx and arm64]
+  # python 3.10
+  - 1.21
+  # python 3.11
+  - 1.23
+
+zip_keys:
+  -
+    - python
+    - numpy

@@ -1,6 +1,6 @@
 package:
   name: discover
-  version: 0.9.4
+  version: 0.9.5
 
 source:
   path: ..
@@ -8,7 +8,6 @@ source:
     - arch-core2.patch
     - no-stack-arrays.patch
     - no-lto.patch                  # [osx]
-    - restore-old-nan-code.patch    # [osx]
 
 build:
   number: 0

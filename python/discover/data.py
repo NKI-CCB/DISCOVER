@@ -48,7 +48,7 @@ class DiscoverMatrix(object):
         self._events = events.copy(deep=False)
 
         if bg is None:
-            self._bg = events.__array_wrap__(estimate_background(events, strata))
+            self._bg = pandas.DataFrame(estimate_background(events, strata), index=events.index, columns=events.columns)
         else:
             if strata is not None:
                 import warnings
