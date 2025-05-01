@@ -3,6 +3,7 @@
 #' @param x a real-valued matrix.
 #' @return a vector with elements corresponding to the log sums of exponentials of the columns of \code{x}.
 #'
+#' @noRd
 #' @useDynLib discover
 colLogSumExps <- function (x) {
   .Fortran("colLogSumExps", as.double(x), as.integer(nrow(x)), as.integer(ncol(x)), result=double(ncol(x)), NAOK=TRUE)$result

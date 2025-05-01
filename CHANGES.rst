@@ -21,12 +21,28 @@ of the Python package would have features that do not exist in version
 0.9 series
 ==========
 
-:Latest Python version:  0.9.5 (May 11, 2023)
+:Latest Python version:  0.9.6 (May 1, 2025)
 :Latest R version:       0.9.4 (July 28, 2021)
 
 
 Python package
 --------------
+
+0.9.6 (May 1, 2025)
+~~~~~~~~~~~~~~~~~~~
+
+**Changed**:
+
+- Migrated to Meson for building the package. This enables packaging
+  for recent versions of Python. Previously, discover packages were
+  built using distutils, which is no longer included since Python
+  3.12.
+
+**Fixed**:
+
+- Updated the `row_stack` function for compatibility with recent
+  versions of pandas.
+
 
 0.9.5 (May 11, 2023)
 ~~~~~~~~~~~~~~~~~~~~

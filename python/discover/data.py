@@ -132,5 +132,5 @@ def row_stack(matrices):
     """
     assert all((x._events.columns == matrices[0]._events.columns).all() for x in matrices)
     return DiscoverMatrix(
-        pandas.concat([x._events for x in matrices], 0),
-        pandas.concat([x._bg for x in matrices], 0))
+        pandas.concat([x._events for x in matrices], axis=0),
+        pandas.concat([x._bg for x in matrices], axis=0))

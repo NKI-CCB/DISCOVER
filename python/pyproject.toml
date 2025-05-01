@@ -1,0 +1,19 @@
+[build-system]
+build-backend = 'mesonpy'
+requires = ['meson-python', 'numpy>=1.22']
+
+[project]
+name = 'discover'
+version = '0.9.6'
+description = 'DISCOVER mutual exclusivity and co-occurrence analysis'
+dependencies = [
+  'numpy',
+  'pandas'
+]
+authors = [{name = 'Sander Canisius', email = 's.canisius@nki.nl'}]
+license = {text = "Apache License 2.0"}
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3"
+]

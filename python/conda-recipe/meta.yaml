@@ -1,13 +1,9 @@
 package:
   name: discover
-  version: 0.9.5
+  version: 0.9.6
 
 source:
   path: ..
-  patches:
-    - arch-core2.patch
-    - no-stack-arrays.patch
-    - no-lto.patch                  # [osx]
 
 build:
   number: 0
@@ -18,15 +14,27 @@ build:
   features:
     - nomkl                         # [x86 and blas_impl != 'mkl']
 
+  script_env:
+    - PKG_CONFIG_PATH=%PREFIX%\Library\lib\pkgconfig       # [win]
+
+  script: >-
+    python -m pip install
+    --config-settings setup-args="-Dstack-arrays=false"
+    --config-settings setup-args="-Darch=core2"
+    --no-deps
+    .
+
 requirements:
   build:
     - {{ compiler('c') }}           # [unix]
     - {{ compiler('fortran') }}     # [unix]
     - m2w64-toolchain               # [win]
-    - libpython                     # [win]
 
   host:
     - python
+    - libpython                     # [win]
+    - pip >=23.1
+    - meson-python
     - numpy
     - mkl-devel                     # [blas_impl == 'mkl']
     - openblas-devel                # [blas_impl == 'openblas']

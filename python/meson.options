@@ -1,0 +1,5 @@
+option('blas', type: 'string', value: 'auto', description: 'Option for BLAS library selection. By default, try to find the blas used for building numpy')
+option('arch', type: 'string', value: 'native', description: 'Sets the -march option')
+option('fast', type: 'boolean', value: true, description: 'Enables -Ofast')
+option('stack-arrays', type: 'boolean', value: true, description: 'Puts arrays on the stack')
+option('openmp', type: 'feature', value: 'enabled', description: 'Enable OpenMP')

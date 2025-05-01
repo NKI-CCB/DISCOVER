@@ -7,18 +7,21 @@ python:
   - 3.9
   - 3.10
   - 3.11
+  - 3.12
 
 numpy:
   # python 3.8-3.9
-  - 1.16    # [not (osx and arm64)]
-  - 1.16    # [not (osx and arm64)]
+  - 1.22    # [not (osx and arm64)]
+  - 1.22    # [not (osx and arm64)]
   # python 3.8-3.9
-  - 1.19    # [osx and arm64]
-  - 1.19    # [osx and arm64]
+  - 1.22    # [osx and arm64]
+  - 1.22    # [osx and arm64]
   # python 3.10
-  - 1.21
+  - 1.22
   # python 3.11
   - 1.23
+  # python 3.12
+  - 1.26
 
 zip_keys:
   -
